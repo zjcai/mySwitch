@@ -1,28 +1,23 @@
-const https = require('https');
 const cheerio = require("cheerio");
+const child_process = require("child_process");
+const fs = require('fs');
 
-const url = 'https://www.bestbuy.com/site/nintendo-switch-32gb-console-neon-red-neon-blue-joy-con/6364255.p?skuId=6364255'
+const wgetC = 'wget -O result.html https://www.bestbuy.com/site/nintendo-switch-32gb-console-neon-red-neon-blue-joy-con/6364255.p?skuId=6364255'
 
-https.get(url, (resp) => {
-  let data = '';
-  resp.on('data', (chunk) => {
-    data += chunk;
-  });
-
-  resp.on('end', () => {
-    checkAvailability(data)
-    console.log('Done\n');
-  });
-}).on('error', (err) => {
-  console.log('Error: ' + err.message);
+child_process.exec(wgetC, (error, stdout) => {
+  if (error) {
+    console.log(error);
+  }
+  console.log("2 " + stdout);
+  checkAvailability()
 });
 
-function checkAvailability(data) {
-  const $ = cheerio.load(data); //use as JQuery
+function checkAvailability() {
+  const $ = cheerio.load(fs.readFileSync('result.html')); //use as JQuery
   var buttonText = $('.fulfillment-add-to-cart-button div button').text();
   console.log(buttonText + ' time: ' + new Date() + '\n')
-  if (status != 'Sold Out') {
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
+  if (buttonText != 'Sold Out' && buttonText != 'Check Stores') {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
   }
 }
